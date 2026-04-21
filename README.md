@@ -50,39 +50,12 @@ Includes guided exercises and in-class practice.
 
 Small-scale projects applying multiple concepts.
 
-### notes
-
-Conceptual summaries and explanations for key topics.
-
----
-
-# Example Structure
-
-```
-assignments/
-    assignment-01-oop-basics/
-    assignment-02-inheritance/
-
-labs/
-    lab-01-classes/
-    lab-02-polymorphism/
-
-mini-projects/
-    library-management-system/
-    student-record-system/
-
-notes/
-    oop.md
-    inheritance.md
-    polymorphism.md
-```
-
 ---
 
 # Technologies
 
-* Language: Java (or your chosen language)
-* Tools: Standard development tools and IDEs
+* Language: Java
+* Tools: VSCode, Antigravity
 
 ---
 
@@ -94,8 +67,3 @@ This repository serves as:
 * A reference for programming concepts
 * A demonstration of coding progression
 
----
-
-# Notes
-
-All materials are organized to maintain clarity, consistency, and ease of navigation.
