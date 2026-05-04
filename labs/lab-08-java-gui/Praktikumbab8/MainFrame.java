@@ -62,14 +62,14 @@ class Probstat extends MataKuliah {
 
 public class MainFrame extends Frame {
     private Checkbox cbASD, cbPemlan, cbMatkomlan, cbProbstat;
-    private CheckboxGroup groupMatkul;
+    private CheckboxGroup bg;
     private TextField txtTugas, txtKuis, txtUts, txtUas, txtHasil;
     private TextArea txtAreaRekap;
     private Button btnHitung, btnTampilkan;
     private StringBuilder dataRekap = new StringBuilder("HASIL NILAI SEMUA MATA KULIAH\n\n");
 
     public MainFrame() {
-        setTitle("Hitung Nilai Akhir (AWT Version)");
+        setTitle("Hitung Nilai Akhir");
         setSize(400, 650);
         setLayout(new FlowLayout());
         setLocationRelativeTo(null);
@@ -77,19 +77,19 @@ public class MainFrame extends Frame {
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 dispose();
+                System.exit(0);
             }
         });
 
         Label lblHeader = new Label("Hitung Nilai Akhir", Label.CENTER);
         lblHeader.setFont(new Font("Arial", Font.BOLD, 16));
 
-        // Radio Buttons (Checkboxes with CheckboxGroup)
         Panel pnlRadio = new Panel(new FlowLayout());
-        groupMatkul = new CheckboxGroup();
-        cbASD = new Checkbox("ASD", groupMatkul, false);
-        cbPemlan = new Checkbox("Pemlan", groupMatkul, true);
-        cbMatkomlan = new Checkbox("Matkomlan", groupMatkul, false);
-        cbProbstat = new Checkbox("Probstat", groupMatkul, false);
+        bg = new CheckboxGroup();
+        cbASD = new Checkbox("ASD", bg, false);
+        cbPemlan = new Checkbox("Pemlan", bg, true);
+        cbMatkomlan = new Checkbox("Matkomlan", bg, false);
+        cbProbstat = new Checkbox("Probstat", bg, false);
         pnlRadio.add(cbASD);
         pnlRadio.add(cbPemlan);
         pnlRadio.add(cbMatkomlan);
@@ -100,11 +100,11 @@ public class MainFrame extends Frame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
-        txtTugas = new TextField(15);
-        txtKuis = new TextField(15);
-        txtUts = new TextField(15);
-        txtUas = new TextField(15);
-        txtHasil = new TextField(15);
+        txtTugas = new TextField(12);
+        txtKuis = new TextField(12);
+        txtUts = new TextField(12);
+        txtUas = new TextField(12);
+        txtHasil = new TextField(12);
         txtHasil.setEditable(false);
 
         addRow(pnlInput, "Tugas :", txtTugas, gbc, 0);
@@ -114,12 +114,9 @@ public class MainFrame extends Frame {
         addRow(pnlInput, "Hasil :", txtHasil, gbc, 4);
 
         btnHitung = new Button("Hitung");
-        txtAreaRekap = new TextArea(10, 40);
+        txtAreaRekap = new TextArea(10, 35);
         txtAreaRekap.setEditable(false);
         btnTampilkan = new Button("Tampilkan nilai semua matkul");
-
-        Panel mainContent = new Panel();
-        mainContent.setLayout(new GridLayout(0, 1, 10, 10));
 
         add(lblHeader);
         add(pnlRadio);
@@ -127,6 +124,19 @@ public class MainFrame extends Frame {
         add(btnHitung);
         add(txtAreaRekap);
         add(btnTampilkan);
+
+        ActionListener resetAction = e -> {
+            txtTugas.setText("");
+            txtKuis.setText("");
+            txtUts.setText("");
+            txtUas.setText("");
+            txtHasil.setText("");
+        };
+
+        cbASD.addItemListener(e -> resetAction.actionPerformed(null));
+        cbPemlan.addItemListener(e -> resetAction.actionPerformed(null));
+        cbMatkomlan.addItemListener(e -> resetAction.actionPerformed(null));
+        cbProbstat.addItemListener(e -> resetAction.actionPerformed(null));
 
         btnHitung.addActionListener(e -> {
             try {
@@ -136,8 +146,7 @@ public class MainFrame extends Frame {
                 double uas = Double.parseDouble(txtUas.getText());
 
                 MataKuliah mk;
-                Checkbox selected = groupMatkul.getSelectedCheckbox();
-
+                Checkbox selected = bg.getSelectedCheckbox();
                 if (selected == cbASD)
                     mk = new ASD();
                 else if (selected == cbPemlan)
@@ -148,10 +157,19 @@ public class MainFrame extends Frame {
                     mk = new Probstat();
 
                 double hasil = mk.hitungNilai(uts, uas, tgs, kuis);
-                txtHasil.setText(String.format("%.2f", hasil));
+                txtHasil.setText(String.valueOf(hasil));
                 dataRekap.append(String.format("%-15s : %.1f\n", mk.getNama(), hasil));
             } catch (Exception ex) {
-                showSimpleError("Input tidak valid!");
+
+                Dialog d = new Dialog(this, "Alert", true);
+                d.setLayout(new FlowLayout());
+                d.add(new Label("Input tidak valid!"));
+                Button ok = new Button("OK");
+                ok.addActionListener(ev -> d.dispose());
+                d.add(ok);
+                d.setSize(150, 100);
+                d.setLocationRelativeTo(this);
+                d.setVisible(true);
             }
         });
 
@@ -166,18 +184,6 @@ public class MainFrame extends Frame {
         p.add(new Label(l), c);
         c.gridx = 1;
         p.add(f, c);
-    }
-
-    private void showSimpleError(String msg) {
-        Dialog d = new Dialog(this, "Error", true);
-        d.setLayout(new FlowLayout());
-        d.add(new Label(msg));
-        Button ok = new Button("OK");
-        ok.addActionListener(e -> d.dispose());
-        d.add(ok);
-        d.setSize(200, 100);
-        d.setLocationRelativeTo(this);
-        d.setVisible(true);
     }
 
     public static void main(String[] args) {
