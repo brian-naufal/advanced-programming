@@ -1,4 +1,3 @@
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -16,7 +15,7 @@ abstract class MataKuliah {
     public abstract double hitungNilai(double uts, double uas, double tugas, double kuis);
 }
 
-// UTS:35%, UAS:25%, Tugas:25%, Kuis:15%
+// UTS 35% UAS 25% TUGAS 25% KUIS 15%
 class ASD extends MataKuliah {
     public ASD() {
         super("ASD");
@@ -61,49 +60,51 @@ class Probstat extends MataKuliah {
     }
 }
 
-public class MainFrame extends JFrame {
-    private JRadioButton rbASD, rbPemlan, rbMatkomlan, rbProbstat;
-    private JTextField txtTugas, txtKuis, txtUts, txtUas, txtHasil;
-    private JTextArea txtAreaRekap;
-    private JButton btnHitung, btnTampilkan;
+public class MainFrame extends Frame {
+    private Checkbox cbASD, cbPemlan, cbMatkomlan, cbProbstat;
+    private CheckboxGroup groupMatkul;
+    private TextField txtTugas, txtKuis, txtUts, txtUas, txtHasil;
+    private TextArea txtAreaRekap;
+    private Button btnHitung, btnTampilkan;
     private StringBuilder dataRekap = new StringBuilder("HASIL NILAI SEMUA MATA KULIAH\n\n");
 
     public MainFrame() {
-        setTitle("Hitung Nilai Akhir");
+        setTitle("Hitung Nilai Akhir (AWT Version)");
         setSize(400, 650);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new FlowLayout());
         setLocationRelativeTo(null);
-        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
-        JLabel lblHeader = new JLabel("Hitung Nilai Akhir");
-        lblHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
+        Label lblHeader = new Label("Hitung Nilai Akhir", Label.CENTER);
         lblHeader.setFont(new Font("Arial", Font.BOLD, 16));
-        lblHeader.setBorder(BorderFactory.createEmptyBorder(15, 0, 10, 0));
 
-        JPanel pnlRadio = new JPanel(new FlowLayout());
-        rbASD = new JRadioButton("ASD");
-        rbPemlan = new JRadioButton("Pemlan", true);
-        rbMatkomlan = new JRadioButton("Matkomlan");
-        rbProbstat = new JRadioButton("Probstat");
-        ButtonGroup bg = new ButtonGroup();
-        bg.add(rbASD);
-        bg.add(rbPemlan);
-        bg.add(rbMatkomlan);
-        bg.add(rbProbstat);
-        pnlRadio.add(rbASD);
-        pnlRadio.add(rbPemlan);
-        pnlRadio.add(rbMatkomlan);
-        pnlRadio.add(rbProbstat);
+        // Radio Buttons (Checkboxes with CheckboxGroup)
+        Panel pnlRadio = new Panel(new FlowLayout());
+        groupMatkul = new CheckboxGroup();
+        cbASD = new Checkbox("ASD", groupMatkul, false);
+        cbPemlan = new Checkbox("Pemlan", groupMatkul, true);
+        cbMatkomlan = new Checkbox("Matkomlan", groupMatkul, false);
+        cbProbstat = new Checkbox("Probstat", groupMatkul, false);
+        pnlRadio.add(cbASD);
+        pnlRadio.add(cbPemlan);
+        pnlRadio.add(cbMatkomlan);
+        pnlRadio.add(cbProbstat);
 
-        JPanel pnlInput = new JPanel(new GridBagLayout());
+        Panel pnlInput = new Panel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
-        txtTugas = new JTextField(12);
-        txtKuis = new JTextField(12);
-        txtUts = new JTextField(12);
-        txtUas = new JTextField(12);
-        txtHasil = new JTextField(12);
+
+        txtTugas = new TextField(15);
+        txtKuis = new TextField(15);
+        txtUts = new TextField(15);
+        txtUas = new TextField(15);
+        txtHasil = new TextField(15);
         txtHasil.setEditable(false);
 
         addRow(pnlInput, "Tugas :", txtTugas, gbc, 0);
@@ -112,38 +113,20 @@ public class MainFrame extends JFrame {
         addRow(pnlInput, "UAS :", txtUas, gbc, 3);
         addRow(pnlInput, "Hasil :", txtHasil, gbc, 4);
 
-        btnHitung = new JButton("Hitung");
-        btnHitung.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        txtAreaRekap = new JTextArea(10, 25);
+        btnHitung = new Button("Hitung");
+        txtAreaRekap = new TextArea(10, 40);
         txtAreaRekap.setEditable(false);
-        JScrollPane scroll = new JScrollPane(txtAreaRekap);
+        btnTampilkan = new Button("Tampilkan nilai semua matkul");
 
-        btnTampilkan = new JButton("Tampilkan nilai semua matkul");
-        btnTampilkan.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Panel mainContent = new Panel();
+        mainContent.setLayout(new GridLayout(0, 1, 10, 10));
 
         add(lblHeader);
         add(pnlRadio);
         add(pnlInput);
-        add(Box.createRigidArea(new Dimension(0, 10)));
         add(btnHitung);
-        add(Box.createRigidArea(new Dimension(0, 10)));
-        add(scroll);
-        add(Box.createRigidArea(new Dimension(0, 10)));
+        add(txtAreaRekap);
         add(btnTampilkan);
-        add(Box.createRigidArea(new Dimension(0, 20)));
-
-        ActionListener resetAction = e -> {
-            txtTugas.setText("");
-            txtKuis.setText("");
-            txtUts.setText("");
-            txtUas.setText("");
-            txtHasil.setText("");
-        };
-        rbASD.addActionListener(resetAction);
-        rbPemlan.addActionListener(resetAction);
-        rbMatkomlan.addActionListener(resetAction);
-        rbProbstat.addActionListener(resetAction);
 
         btnHitung.addActionListener(e -> {
             try {
@@ -153,20 +136,22 @@ public class MainFrame extends JFrame {
                 double uas = Double.parseDouble(txtUas.getText());
 
                 MataKuliah mk;
-                if (rbASD.isSelected())
+                Checkbox selected = groupMatkul.getSelectedCheckbox();
+
+                if (selected == cbASD)
                     mk = new ASD();
-                else if (rbPemlan.isSelected())
+                else if (selected == cbPemlan)
                     mk = new Pemlan();
-                else if (rbMatkomlan.isSelected())
+                else if (selected == cbMatkomlan)
                     mk = new Matkomlan();
                 else
                     mk = new Probstat();
 
                 double hasil = mk.hitungNilai(uts, uas, tgs, kuis);
-                txtHasil.setText(String.valueOf(hasil));
+                txtHasil.setText(String.format("%.2f", hasil));
                 dataRekap.append(String.format("%-15s : %.1f\n", mk.getNama(), hasil));
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Input tidak valid!");
+                showSimpleError("Input tidak valid!");
             }
         });
 
@@ -175,12 +160,24 @@ public class MainFrame extends JFrame {
         setVisible(true);
     }
 
-    private void addRow(JPanel p, String l, JTextField f, GridBagConstraints c, int y) {
+    private void addRow(Panel p, String l, TextField f, GridBagConstraints c, int y) {
         c.gridx = 0;
         c.gridy = y;
-        p.add(new JLabel(l), c);
+        p.add(new Label(l), c);
         c.gridx = 1;
         p.add(f, c);
+    }
+
+    private void showSimpleError(String msg) {
+        Dialog d = new Dialog(this, "Error", true);
+        d.setLayout(new FlowLayout());
+        d.add(new Label(msg));
+        Button ok = new Button("OK");
+        ok.addActionListener(e -> d.dispose());
+        d.add(ok);
+        d.setSize(200, 100);
+        d.setLocationRelativeTo(this);
+        d.setVisible(true);
     }
 
     public static void main(String[] args) {
